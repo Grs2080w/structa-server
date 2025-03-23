@@ -1,0 +1,65 @@
+schema {
+	query: Query
+	mutation: Mutation
+}
+
+type Colaborators {
+	id: ID!
+	name: String
+	avatar: String
+}
+
+type Tasks {
+	id: ID!
+	name: String
+	description: String
+	created: String
+	who_create: String
+	status: String
+	type: String
+}
+
+type WHOCREATEPROJECT {
+	id: ID!
+	username: String!
+}
+
+type Project {
+	id: ID!
+	name: String
+	description: String
+	created: String
+	who_create: WHOCREATEPROJECT!
+	status: String
+	tasks: [Tasks]
+	colaborators: [Colaborators]
+}
+
+type User {
+	id: ID!
+	username: String
+	name: String
+	password: String
+	first_login: String!
+	project_closed_count: Int!
+	project_open_count: Int!
+	projects_aborted_count: Int!
+	avatar_url: String
+	projects: [Project]
+}
+
+type Token {
+	data: String!
+}
+
+type Query {
+	listUsers: [User]
+	getUser(id: ID!): User!
+	usersCount: Int
+}
+
+type Mutation {
+	createUser(name: String!, username: String!, password: String!): User!
+	deleteUser(id: ID!): User!
+	userLogin(name: String!, password: String!): Token!
+}
