@@ -1,9 +1,7 @@
-# queries.py
-
 import json
 
-from flaskr.graphql.auth_token import auth
-from flaskr.redis.redis_controls import returnAllUsers, searchDataUser
+from flaskr.graphql.auth.auth_token import auth
+from flaskr.redis.redis_users_controls import returnAllUsers, searchDataUser
 
 
 def listUsers_resolver(obj, info):

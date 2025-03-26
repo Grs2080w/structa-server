@@ -4,7 +4,19 @@ from jwt import exceptions
 from criptography.jwt_controls import token_decode
 
 
-def auth(info):
+def auth(info) -> dict:
+    """
+    Verify if the Authorization token is valid.
+
+    Args:
+        info (Info): Info about the request.
+
+    Returns:
+        dict: The decoded token.
+
+    Raises:
+        GraphQLError: If the Authorization token is invalid or missing.
+    """
     auth: str = info.context.headers.get("Authorization")
 
     if not auth:

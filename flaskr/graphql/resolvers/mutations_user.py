@@ -1,5 +1,3 @@
-# mutations.py
-
 import json
 from datetime import date
 from uuid import uuid4
@@ -8,8 +6,8 @@ import bcrypt
 from graphql import GraphQLError
 
 from criptography.jwt_controls import token_encode
-from flaskr.graphql.auth_token import auth
-from flaskr.redis.redis_controls import (
+from flaskr.graphql.auth.auth_token import auth
+from flaskr.redis.redis_users_controls import (
     addNewUser,
     deleteExistentUser,
     findUserByParam,
@@ -46,14 +44,13 @@ def createUser(obj, info, name, username, password):
     return json.loads(json.dumps(newUser))
 
 
-def deleteUser(obj, info, id):
-    auth(info)
-    user = searchDataUser(id)
-    deleteExistentUser(id)
+def deleteUser(obj, info):
+    idUser, usernameUser = auth(info).values()
+    user = searchDataUser(idUser)
+    deleteExistentUser(idUser)
     return json.loads(user[0])
 
 
-def userLogin(obj, info, name, password):
-    auth(info)
-    payload = json.loads(loginUser(name, password))
+def userLogin(obj, info, username, password):
+    payload = json.loads(loginUser(username, password))
     return {"data": token_encode(payload)}

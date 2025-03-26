@@ -5,8 +5,7 @@ schema {
 
 type Colaborators {
 	id: ID!
-	name: String
-	avatar: String
+	username: String
 }
 
 type Tasks {
@@ -17,6 +16,8 @@ type Tasks {
 	who_create: String
 	status: String
 	type: String
+	assignee: String
+	rating: Int
 }
 
 type WHOCREATEPROJECT {
@@ -45,21 +46,36 @@ type User {
 	project_open_count: Int!
 	projects_aborted_count: Int!
 	avatar_url: String
-	projects: [Project]
+	projects: [String]
 }
 
 type Token {
 	data: String!
 }
 
+type StatusMessageProject {
+	status: String!
+}
+
 type Query {
 	listUsers: [User]
 	getUser(id: ID!): User!
 	usersCount: Int
+
+	listProjects: [Project]
+	getProject(id: ID!): Project!
+	projectCount: Int
 }
 
 type Mutation {
 	createUser(name: String!, username: String!, password: String!): User!
-	deleteUser(id: ID!): User!
-	userLogin(name: String!, password: String!): Token!
+	deleteUser: User!
+	userLogin(username: String!, password: String!): Token!
+	createProject(nameProject: String!): Project!
+	deleteProject(idProject: String): StatusMessageProject!
+	addColaboratorToProject(idProject: String!, idColaborator: String!): StatusMessageProject!
+	removeColaboratorToProject(idProject: String!, idColaborator: String!): StatusMessageProject!
+	addTaskToProject(idProject: String!, name: String!, description: String!, typeOfTask: String!): Tasks!
+	deleteTaskToProject(idProject: String!, idTask: String!): StatusMessageProject!
+	addAssigneeToTask(idProject: String!, idTask: String!, idAssignee: String!): StatusMessageProject!
 }

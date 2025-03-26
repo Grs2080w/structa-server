@@ -2,11 +2,12 @@
 
 import json
 
+import bcrypt
 from graphql import GraphQLError
 from redis.commands.json.path import Path
 from redis.commands.search.query import Query
 
-from flaskr.redis.db_schemas import index, r
+from flaskr.redis.schema.schemas import index, r
 
 
 def returnAllUsers():
@@ -43,14 +44,10 @@ def searchDataUser(id, *args):
         return resFromQuery, 200
 
     except TypeError:
-        print("Argumentos inválidos para .get(). Verifique *args.")
-    except Exception as e:
-        print(f"Erro inesperado: {e}")
-
-    raise GraphQLError(
-        f"User with id: {id} not found",
-        extensions={"code": "USER_NOT_FOUND", "status": 404},
-    )
+        raise GraphQLError(
+            f"User with id: {id} not found",
+            extensions={"code": "USER_NOT_FOUND", "status": 404},
+        )
 
 
 def addNewUser(obj):
@@ -101,7 +98,37 @@ def findUserByParam(param, value):
             return True
 
 
-def loginUser(name, password):
+def alterUserwithNewProject(id: str, newProject: dict[str, any]):
+    user = searchDataUser(id)
+    user = json.loads(user[0])
+
+    userProjects: list = user["projects"]
+    userProjects.append(newProject["id"])
+
+    user.update(
+        {"projects": userProjects, "project_open_count": user["project_open_count"] + 1}
+    )
+
+    r.json().set(f"user:{id}", Path.root_path(), json.dumps(user))
+
+
+def alterUserwithAbortedProject(iduser: str, idProject: str):
+    user = json.loads(searchDataUser(iduser)[0])
+
+    user.update(
+        {
+            "projects_aborted_count": user["projects_aborted_count"] + 1,
+        }
+    )
+
+    alterUser(iduser, user)
+
+
+def alterUser(iduser: str, obj: dict[str, any]):
+    r.json().set(f"user:{iduser}", Path.root_path(), json.dumps(obj))
+
+
+def loginUser(username, passwordReceived):
     """
     Search a user by name and password
 
@@ -115,12 +142,18 @@ def loginUser(name, password):
     Raises:
         GraphQLError: if user not found
     """
-    res = index.search("*").docs
-    for doc in res:
-        user = json.loads(doc.json)
 
-        if user["name"] == name and user["password"] == password:
-            return json.dumps({"id": user["id"], "name": user["name"]})
+    response: list = index.search("*").docs
+
+    for doc in response:
+        user = json.loads(doc.json)
+        passwordUser_byte = user["password"].encode("utf-8")
+        passwordReceivedbyUser = passwordReceived.encode("utf-8")
+
+        if user["username"] == username and bcrypt.checkpw(
+            passwordReceivedbyUser, passwordUser_byte
+        ):
+            return json.dumps({"id": user["id"], "username": user["username"]})
 
     raise GraphQLError(
         "User or password incorrect",

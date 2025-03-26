@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 
-from flaskr.graphql.graphql_blueprint import graphql_Blueprint
+from flaskr.graphql.server import graphql_Blueprint
 
 app = Flask(__name__)
 CORS(
@@ -10,7 +10,6 @@ CORS(
     supports_credentials=True,
     methods=["GET", "POST"],
 )
-
 
 # Routes
 app.register_blueprint(graphql_Blueprint)

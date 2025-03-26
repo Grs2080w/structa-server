@@ -4,7 +4,7 @@ list_projects = [
         "name": "marketing campaign",
         "description": "social media campaign",
         "created": "2023-03-10",
-        "who_create": {"id": "user-001", "name": "alice johnson"},
+        "who_create": {"id": "user-001", "username": "alice johnson"},
         "tasks": [
             {
                 "id": "task-001",
@@ -16,9 +16,7 @@ list_projects = [
                 "type": "creative",
             }
         ],
-        "colaborators": [
-            {"id": "collab-001", "name": "bob smith", "avatar": "avatar-bob-url"}
-        ],
+        "colaborators": [{"id": "collab-001", "name": "bob smith"}],
         "status": "active",
     },
     {
@@ -26,7 +24,7 @@ list_projects = [
         "name": "website redesign",
         "description": "modernize company website",
         "created": "2023-05-15",
-        "who_create": {"id": "user-002", "name": "charlie davis"},
+        "who_create": {"id": "user-002", "username": "charlie davis"},
         "tasks": [
             {
                 "id": "task-002",
@@ -38,9 +36,7 @@ list_projects = [
                 "type": "design",
             }
         ],
-        "colaborators": [
-            {"id": "collab-002", "name": "emma wilson", "avatar": "avatar-emma-url"}
-        ],
+        "colaborators": [{"id": "collab-002", "name": "emma wilson"}],
         "status": "active",
     },
     {
@@ -48,7 +44,7 @@ list_projects = [
         "name": "SEO Optimization",
         "description": "improve search rankings",
         "created": "2023-07-20",
-        "who_create": {"id": "user-003", "name": "david lee"},
+        "who_create": {"id": "user-003", "username": "david lee"},
         "tasks": [
             {
                 "id": "task-003",
@@ -61,7 +57,10 @@ list_projects = [
             }
         ],
         "colaborators": [
-            {"id": "collab-003", "name": "sophia brown", "avatar": "avatar-sophia-url"}
+            {
+                "id": "collab-003",
+                "name": "sophia brown",
+            }
         ],
         "status": "completed",
     },
@@ -70,7 +69,7 @@ list_projects = [
         "name": "product launch",
         "description": "introduce new product",
         "created": "2023-09-05",
-        "who_create": {"id": "user-004", "name": "eva miller"},
+        "who_create": {"id": "user-004", "username": "eva miller"},
         "tasks": [
             {
                 "id": "task-004",
@@ -86,7 +85,6 @@ list_projects = [
             {
                 "id": "collab-004",
                 "name": "michael clark",
-                "avatar": "avatar-michael-url",
             }
         ],
         "status": "active",
@@ -96,7 +94,7 @@ list_projects = [
         "name": "customer survey",
         "description": "analyze user feedback",
         "created": "2023-11-10",
-        "who_create": {"id": "user-005", "name": "olivia thompson"},
+        "who_create": {"id": "user-005", "username": "olivia thompson"},
         "tasks": [
             {
                 "id": "task-005",
@@ -108,9 +106,7 @@ list_projects = [
                 "type": "research",
             }
         ],
-        "colaborators": [
-            {"id": "collab-005", "name": "james anderson", "avatar": "avatar-james-url"}
-        ],
+        "colaborators": [{"id": "collab-005", "name": "james anderson"}],
         "status": "active",
     },
 ]

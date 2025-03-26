@@ -7,10 +7,23 @@ from ariadne import (
 )
 from ariadne.explorer import ExplorerGraphiQL
 from flask import Blueprint, jsonify, request
-from graphql import GraphQLError
 
-from flaskr.graphql.mutations import createUser, deleteUser, userLogin
-from flaskr.graphql.queries import (
+from flaskr.graphql.resolvers.mutations_projects import (
+    addAssigneeToTask,
+    addColaboratorProject,
+    addTasktoProject,
+    createProject,
+    deleteProject,
+    deleteTaskfromProject,
+    removeColaboratorProject,
+)
+from flaskr.graphql.resolvers.mutations_user import createUser, deleteUser, userLogin
+from flaskr.graphql.resolvers.queries_projects import (
+    getProjects_resolver,
+    listProjects_resolver,
+    projectsCount_resolver,
+)
+from flaskr.graphql.resolvers.queries_user import (
     getUser_resolver,
     listUsers_resolver,
     usersCount_resolver,
@@ -30,11 +43,24 @@ query.set_field("listUsers", listUsers_resolver)
 query.set_field("getUser", getUser_resolver)
 query.set_field("usersCount", usersCount_resolver)
 
+query.set_field("listProjects", listProjects_resolver)
+query.set_field("getProject", getProjects_resolver)
+query.set_field("projectCount", projectsCount_resolver)
+
 
 # mutations
 mutation.set_field("createUser", createUser)
 mutation.set_field("deleteUser", deleteUser)
 mutation.set_field("userLogin", userLogin)
+
+mutation.set_field("createProject", createProject)
+mutation.set_field("deleteProject", deleteProject)
+mutation.set_field("addColaboratorToProject", addColaboratorProject)
+mutation.set_field("removeColaboratorToProject", removeColaboratorProject)
+mutation.set_field("addTaskToProject", addTasktoProject)
+mutation.set_field("deleteTaskToProject", deleteTaskfromProject)
+mutation.set_field("addAssigneeToTask", addAssigneeToTask)
+
 
 # schema
 type_defs = load_schema_from_path("flaskr/graphql/schema.graphql")
