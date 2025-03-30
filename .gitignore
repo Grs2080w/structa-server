@@ -18,3 +18,7 @@ build/
 ssh
 .ssh
 .ssh.pub
+
+
+.md
+.excalidraw

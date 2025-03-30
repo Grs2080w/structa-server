@@ -1,3 +1,4 @@
+# Ariadne Utils
 from ariadne import (
     ObjectType,
     graphql_sync,
@@ -5,29 +6,71 @@ from ariadne import (
     make_executable_schema,
     snake_case_fallback_resolvers,
 )
+
+# Server
 from ariadne.explorer import ExplorerGraphiQL
 from flask import Blueprint, jsonify, request
 
-from flaskr.graphql.resolvers.mutations_projects import (
-    addAssigneeToTask,
+# Mutations Projects
+from flaskr.graphql.resolvers.projects_resolvers.mutations_projects import (
     addColaboratorProject,
-    addTasktoProject,
+    closeStatusProject,
     createProject,
     deleteProject,
-    deleteTaskfromProject,
     removeColaboratorProject,
 )
-from flaskr.graphql.resolvers.mutations_user import createUser, deleteUser, userLogin
-from flaskr.graphql.resolvers.queries_projects import (
+
+# Queries Projects
+from flaskr.graphql.resolvers.projects_resolvers.queries_projects import (
     getProjects_resolver,
     listProjects_resolver,
     projectsCount_resolver,
 )
-from flaskr.graphql.resolvers.queries_user import (
+
+# Mutations Tasks
+from flaskr.graphql.resolvers.tasks_resolvers.mutations_tasks import (
+    addAssigneeToTask,
+    addTasktoProject,
+    alterRatingTask,
+    alterStatusTask,
+    deleteTaskfromProject,
+)
+
+# Mutations Users
+from flaskr.graphql.resolvers.users_resolvers.mutations_user import (
+    changeAvatarUrlUser,
+    changeEmailUser,
+    cleanNotificationsUser,
+    createUser,
+    deleteUser,
+    turnOTPUser,
+    userLogin,
+    verifyOtp,
+)
+
+# Queries Users
+from flaskr.graphql.resolvers.users_resolvers.queries_user import (
     getUser_resolver,
     listUsers_resolver,
     usersCount_resolver,
 )
+
+"""
+This module contains the GraphQL server for the API
+
+It defines the schema, the resolvers and the routes for the GraphQL API.
+
+The API is defined in the `graphql` blueprint, and it has the following routes:
+
+* `GET /graphql`: the GraphQL API
+* `GET /graphql?query=<query>`: execute a GraphQL query and return the result
+* `POST /graphql`: execute a GraphQL mutation and return the result
+
+The API uses the `ariadne` library to define the schema and the resolvers.
+The resolvers are defined in the `resolvers` folder.
+
+The API uses the `flask` library to create the routes and the server.
+"""
 
 # blueprint
 graphql_Blueprint = Blueprint("graphql", __name__, url_prefix="/graphql")
@@ -38,28 +81,39 @@ query = ObjectType("Query")
 mutation = ObjectType("Mutation")
 
 
-# queries
-query.set_field("listUsers", listUsers_resolver)
-query.set_field("getUser", getUser_resolver)
-query.set_field("usersCount", usersCount_resolver)
+# Queries Projects
+query.set_field("projects", listProjects_resolver)
+query.set_field("project", getProjects_resolver)
+query.set_field("projectsCount", projectsCount_resolver)
 
-query.set_field("listProjects", listProjects_resolver)
-query.set_field("getProject", getProjects_resolver)
-query.set_field("projectCount", projectsCount_resolver)
+# Queries Users
+query.set_field("users", listUsers_resolver)
+query.set_field("user", getUser_resolver)
+query.set_field("userCount", usersCount_resolver)
 
-
-# mutations
+# Mutations Users
 mutation.set_field("createUser", createUser)
 mutation.set_field("deleteUser", deleteUser)
-mutation.set_field("userLogin", userLogin)
+mutation.set_field("login", userLogin)
+mutation.set_field("clearNotifications", cleanNotificationsUser)
+mutation.set_field("updateAvatar", changeAvatarUrlUser)
+mutation.set_field("changeEmailUser", changeEmailUser)
+mutation.set_field("turnOTPUser", turnOTPUser)
+mutation.set_field("verifyOtp", verifyOtp)
 
+# Mutations Projects
 mutation.set_field("createProject", createProject)
 mutation.set_field("deleteProject", deleteProject)
-mutation.set_field("addColaboratorToProject", addColaboratorProject)
-mutation.set_field("removeColaboratorToProject", removeColaboratorProject)
-mutation.set_field("addTaskToProject", addTasktoProject)
-mutation.set_field("deleteTaskToProject", deleteTaskfromProject)
-mutation.set_field("addAssigneeToTask", addAssigneeToTask)
+mutation.set_field("addCollaborator", addColaboratorProject)
+mutation.set_field("removeCollaborator", removeColaboratorProject)
+mutation.set_field("closeProject", closeStatusProject)
+
+# Mutations Tasks
+mutation.set_field("addTask", addTasktoProject)
+mutation.set_field("deleteTask", deleteTaskfromProject)
+mutation.set_field("assignTask", addAssigneeToTask)
+mutation.set_field("updateTaskStatus", alterStatusTask)
+mutation.set_field("updateTaskRating", alterRatingTask)
 
 
 # schema

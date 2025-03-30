@@ -1,6 +1,7 @@
-# Here are all functions that interact directly with redis db
-
+import datetime
 import json
+import random
+from datetime import timezone
 
 import bcrypt
 from graphql import GraphQLError
@@ -8,35 +9,20 @@ from redis.commands.json.path import Path
 from redis.commands.search.query import Query
 
 from flaskr.redis.schema.schemas import index, r
+from otp.send_otp import send_code_otp
+
+"""
+This module contains all the function to interact with the user in the redis database
+"""
 
 
 def returnAllUsers():
-    """
-    Return all users from Redis database.
-
-    Returns:
-        list: A list of dictionaries containing all user data.
-    """
     resFromQuery = index.search(Query("*"))
     user_list = [json.loads(doc.json) for doc in resFromQuery.docs]
     return user_list
 
 
-# return all datas about a user or a specific data about a user
 def searchDataUser(id, *args):
-    """
-    Search a user by id and return all datas about this user or a specific data about this user.
-
-    Args:
-        id (str): The ID of the user to be searched.
-        *args (str): Path to the specific data to be searched.
-
-    Returns:
-        tuple: A tuple with the user data and the status code.
-
-    Raises:
-        GraphQLError: If the user with the specified ID is not found.
-    """
     try:
         resFromQuery = r.json().get(f"user:{id}", *args)
         if not resFromQuery:
@@ -51,45 +37,14 @@ def searchDataUser(id, *args):
 
 
 def addNewUser(obj):
-    """
-    Add a new user to the Redis database.
-
-    Args:
-        obj (dict): The user to be added, represented as a dict containing the user's
-            id, name, password, first_login, avatar_url, project_closed_count,
-            project_open_count, projects_aborted_count, and projects.
-
-    Returns:
-        None
-    """
     r.json().set(f"user:{obj['id']}", Path.root_path(), json.dumps(obj))
 
 
 def deleteExistentUser(id):
-    """
-    Delete an existing user by ID.
-
-    Args:
-        id (str): The ID of the user to be deleted.
-
-    Raises:
-        GraphQLError: If the user with the specified ID is not found.
-    """
-
     r.delete(f"user:{id}")
 
 
 def findUserByParam(param, value):
-    """
-    Find user by param
-
-    Args:
-        param (str): key to be searched
-        value (str): value to be matched with key
-
-    Returns:
-        boolean: True if someone user is found
-    """
     res = index.search("*").docs
     for doc in res:
         user = json.loads(doc.json)
@@ -99,8 +54,7 @@ def findUserByParam(param, value):
 
 
 def alterUserwithNewProject(id: str, newProject: dict[str, any]):
-    user = searchDataUser(id)
-    user = json.loads(user[0])
+    user = json.loads(searchDataUser(id)[0])
 
     userProjects: list = user["projects"]
     userProjects.append(newProject["id"])
@@ -112,7 +66,7 @@ def alterUserwithNewProject(id: str, newProject: dict[str, any]):
     r.json().set(f"user:{id}", Path.root_path(), json.dumps(user))
 
 
-def alterUserwithAbortedProject(iduser: str, idProject: str):
+def alterUserwithAbortedProject(iduser: str):
     user = json.loads(searchDataUser(iduser)[0])
 
     user.update(
@@ -124,25 +78,47 @@ def alterUserwithAbortedProject(iduser: str, idProject: str):
     alterUser(iduser, user)
 
 
+def alterUserwithClosedProject(iduser: str):
+    user = json.loads(searchDataUser(iduser)[0])
+
+    user.update(
+        {
+            "project_closed_count": user["project_closed_count"] + 1,
+        }
+    )
+
+    alterUser(iduser, user)
+
+
 def alterUser(iduser: str, obj: dict[str, any]):
     r.json().set(f"user:{iduser}", Path.root_path(), json.dumps(obj))
 
 
+def addNotification(idUser, notification):
+    user = json.loads(searchDataUser(idUser)[0])
+
+    if not user.get("notifications"):
+        user["notifications"] = []
+
+    notifications = user["notifications"]
+    notifications.append(notification)
+
+    user.update({"notifications": notifications})
+
+    r.json().set(f"user:{idUser}", Path.root_path(), json.dumps(user))
+
+
+def cleanNotifications(idUser):
+    user = json.loads(searchDataUser(idUser)[0])
+
+    user.update({"notifications": []})
+
+    r.json().set(f"user:{idUser}", Path.root_path(), json.dumps(user))
+
+    return True
+
+
 def loginUser(username, passwordReceived):
-    """
-    Search a user by name and password
-
-    Args:
-        name (str): name of user
-        password (str): password of user
-
-    Returns:
-        json: a json with user id and name
-
-    Raises:
-        GraphQLError: if user not found
-    """
-
     response: list = index.search("*").docs
 
     for doc in response:
@@ -153,9 +129,77 @@ def loginUser(username, passwordReceived):
         if user["username"] == username and bcrypt.checkpw(
             passwordReceivedbyUser, passwordUser_byte
         ):
-            return json.dumps({"id": user["id"], "username": user["username"]})
+            exp = int(
+                (
+                    datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=7)
+                ).timestamp()
+            )
+
+            return json.dumps(
+                {
+                    "id": user["id"],
+                    "username": user["username"],
+                    "exp": exp,
+                }
+            )
 
     raise GraphQLError(
         "User or password incorrect",
         extensions={"code": "USER_NOT_FOUND", "status": 404},
+    )
+
+
+def loginUserwithOtp(idUser):
+    user = json.loads(searchDataUser(idUser)[0])
+
+    # create the code
+    codeOTP = "{:06}".format(random.randint(0, 999999))
+
+    # add the code in the user
+    addOTP(idUser, codeOTP)
+
+    # send the code by email
+    send_code_otp(user["email"], codeOTP)
+
+    exp_temp = int(
+        (
+            datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(minutes=5)
+        ).timestamp()
+    )
+
+    return json.dumps(
+        {
+            "exp": exp_temp,
+            "require_otp": True,
+            "id": idUser,
+        }
+    )
+
+
+def addOTP(idUser, codeOTP):
+    user = json.loads(searchDataUser(idUser)[0])
+
+    if not user.get("code_otp"):
+        user["code_otp"] = ""
+
+    user.update({"code_otp": codeOTP})
+
+    r.json().set(f"user:{idUser}", Path.root_path(), json.dumps(user))
+
+
+def tokenAfterOtp(idUser):
+    user = json.loads(searchDataUser(idUser)[0])
+
+    exp = int(
+        (
+            datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=7)
+        ).timestamp()
+    )
+
+    return json.dumps(
+        {
+            "id": user["id"],
+            "username": user["username"],
+            "exp": exp,
+        }
     )

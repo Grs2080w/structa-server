@@ -26,6 +26,10 @@ schemaUser = (
     NumericField("projects_aborted_count"),
     TextField("avatar_url"),
     TextField("projects"),
+    TextField("notifications"),
+    TextField("otp"),
+    TextField("email"),
+    TextField("codeOTP"),
 )
 
 schemaProject = (
@@ -42,8 +46,9 @@ schemaProject = (
     TextField("tasks.status"),
     TextField("tasks.type"),
     TextField("colaborators.id"),
-    TextField("colaborators.name"),
+    TextField("colaborators.username"),
     TextField("colaborators.avatar"),
+    TextField("history"),
 )
 
 

@@ -18,6 +18,9 @@ type Tasks {
 	type: String
 	assignee: String
 	rating: Int
+	tag: String
+	priority: String
+	completed_date: String
 }
 
 type WHOCREATEPROJECT {
@@ -34,6 +37,7 @@ type Project {
 	status: String
 	tasks: [Tasks]
 	colaborators: [Colaborators]
+	history: [String]
 }
 
 type User {
@@ -47,6 +51,10 @@ type User {
 	projects_aborted_count: Int!
 	avatar_url: String
 	projects: [String]
+	notifications: [String]
+	email: String
+	otp: Boolean
+	code_otp: String
 }
 
 type Token {
@@ -58,24 +66,34 @@ type StatusMessageProject {
 }
 
 type Query {
-	listUsers: [User]
-	getUser(id: ID!): User!
-	usersCount: Int
+	users: [User]
+	user(id: ID!): User!
+	userCount: Int
 
-	listProjects: [Project]
-	getProject(id: ID!): Project!
-	projectCount: Int
+	projects: [Project]
+	project(id: ID!): Project!
+	projectsCount: Int
 }
 
 type Mutation {
 	createUser(name: String!, username: String!, password: String!): User!
 	deleteUser: User!
-	userLogin(username: String!, password: String!): Token!
-	createProject(nameProject: String!): Project!
+	login(username: String!, password: String!): Token!
+	clearNotifications: StatusMessageProject!
+	updateAvatar(avatarUrl: String!): StatusMessageProject!
+	changeEmailUser(email: String!): StatusMessageProject!
+	turnOTPUser: StatusMessageProject!
+	verifyOtp(otp: String!): Token!
+
+	createProject(nameProject: String!, descriptionProject: String!): Project!
 	deleteProject(idProject: String): StatusMessageProject!
-	addColaboratorToProject(idProject: String!, idColaborator: String!): StatusMessageProject!
-	removeColaboratorToProject(idProject: String!, idColaborator: String!): StatusMessageProject!
-	addTaskToProject(idProject: String!, name: String!, description: String!, typeOfTask: String!): Tasks!
-	deleteTaskToProject(idProject: String!, idTask: String!): StatusMessageProject!
-	addAssigneeToTask(idProject: String!, idTask: String!, idAssignee: String!): StatusMessageProject!
+	addCollaborator(idProject: String!, idColaborator: String!): StatusMessageProject!
+	removeCollaborator(idProject: String!, idColaborator: String!): StatusMessageProject!
+	closeProject(idProject: String): StatusMessageProject!
+
+	addTask(idProject: String!, name: String!, description: String!, typeOfTask: String!, tag: String!, priority: String!): Tasks!
+	deleteTask(idProject: String!, idTask: String!): StatusMessageProject!
+	assignTask(idProject: String!, idTask: String!, idAssignee: String!): StatusMessageProject!
+	updateTaskStatus(idProject: String!, idTask: String!, status: String!): StatusMessageProject!
+	updateTaskRating(idProject: String!, idTask: String!, rating: Int!): StatusMessageProject!
 }
