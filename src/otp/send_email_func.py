@@ -16,6 +16,5 @@ def send_email(to_email, subject, message):
         server.login(config["EMAIL_USER"], config["EMAIL_PASS"])
         server.sendmail(config["EMAIL_USER"], to_email, msg.as_string())
         server.quit()
-        print("✅ E-mail enviado com sucesso!")
     except Exception as e:
-        print(f"❌ Erro ao enviar e-mail: {e}")
+        print(f"❌ error on send e-mail: {e}")

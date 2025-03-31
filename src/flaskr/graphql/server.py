@@ -117,7 +117,7 @@ mutation.set_field("updateTaskRating", alterRatingTask)
 
 
 # schema
-type_defs = load_schema_from_path("flaskr/graphql/schema.graphql")
+type_defs = load_schema_from_path("src/flaskr/graphql/schema.graphql")
 schema = make_executable_schema(
     type_defs, query, mutation, snake_case_fallback_resolvers
 )
