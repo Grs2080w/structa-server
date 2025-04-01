@@ -12,8 +12,8 @@
 - **OTP Verification**: Sending verification codes via email for two-factor authentication.
 - **SSH Encryption**: Using SSH keys to encode and decode JWT tokens.
 - **Report Generation**:
-- **PDF**: Detailed project reports in PDF format.
-- **CSV**: Exporting project data in CSV format.
+  - **PDF**: Detailed project reports in PDF format.
+  - **CSV**: Exporting project data in CSV format.
 - **Project Management**:
   - Creating, editing and deleting projects.
   - Adding and removing collaborators.
@@ -76,7 +76,8 @@ source .venv/bin/activate
 
 ##### Windows:
 
-1. Open PowerShell or Command Prompt. 2. Run the command:
+1. Open PowerShell or Command Prompt.
+2. Run the command:
 
 ```bash
 ssh-keygen -t rsa -b 2048 -f ssh/.ssh
