@@ -21,6 +21,7 @@ CORS(
     resources={r"/*": {"origins": "*"}},
     supports_credentials=True,
     methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"]
 )
 
 # dir for manage the reports

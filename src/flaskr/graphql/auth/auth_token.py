@@ -55,6 +55,12 @@ def authTokenOTP(info) -> dict:
 
     token = token_decode(token)
 
+    if token.get("username") is not None:
+        raise GraphQLError(
+            "This user is not verified, please check your email",
+            extensions={"code": "USER_NOT_VERIFIED", "status": 401},
+        )
+
     del token["exp"]
     del token["require_otp"]
     return token

@@ -16,6 +16,7 @@ from flaskr.redis.redis_users_controls import (
     findUserByParam,
     loginUser,
     loginUserwithOtp,
+    returnAllUsers,
     searchDataUser,
     tokenAfterOtp,
 )
@@ -41,6 +42,14 @@ inputs and update the Redis database.
 def createUser(obj, info, name, username, password):
     password_byte = password.encode("utf-8")
     hashed = bcrypt.hashpw(password_byte, bcrypt.gensalt())
+
+    users = returnAllUsers()
+    for user in users:
+        if user["username"] == username:
+            raise GraphQLError(
+                f"Username {username} already exists, try again",
+                extensions={"code": "USERNAME_ALREADY_EXISTS", "status": 400},
+            )
 
     newUser = {
         "id": uuid4().__str__(),
@@ -112,6 +121,12 @@ def turnOTPUser(obj, info):
     idUser, username = auth(info).values()
     user = json.loads(searchDataUser(idUser)[0])
 
+    if user["email"] == "":
+        raise GraphQLError(
+            "You need to add an email first",
+            extensions={"code": "EMAIL_NOT_FOUND", "status": 400},
+        )
+
     if not user.get("otp"):
         user["otp"] = False
 
@@ -142,8 +157,6 @@ def verifyOtp(obj, info, otp):
     user = json.loads(searchDataUser(id)[0])
 
     if user["code_otp"] == otp:
-        print("username", user["username"])
-        print("password", user["password"])
         payload = json.loads(tokenAfterOtp(id))
         return {"data": token_encode(payload)}
 

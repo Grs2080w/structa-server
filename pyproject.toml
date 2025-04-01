@@ -54,3 +54,4 @@ packages = ["flaskr", "config", "otp", "cryptography"]
 
 [project.scripts]
 start = "flask --app src/flaskr run"
+prod = "$env:PYTHONPATH = ".\src" && waitress-serve --host 127.0.0.1 flaskr:app"
